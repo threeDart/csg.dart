@@ -1,0 +1,5 @@
+name: csg.dart
+version: 1.0.0
+description: >
+  Constructive solid geometry on meshes using BSP trees in Dart.
+  A port of csg.js (https://github.com/evanw/csg.js).
