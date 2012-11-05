@@ -2,21 +2,24 @@
 // `slices`, and `stacks`, which default to `[0, 0, 0]`, `1`, `16`, and `8`.
 // The `slices` and `stacks` parameters control the tessellation along the
 // longitude and latitude directions.
-// 
+//
 // Example usage:
-// 
+//
 //     var sphere = CSG.sphere({
 //       center: [0, 0, 0],
 //       radius: 1,
 //       slices: 16,
 //       stacks: 8
 //     });
+
+part of csg;
+
 CSG sphere([List center, radius = 1, slices = 16, stacks = 8]) {
   var coords = center == null ? [0, 0, 0] : center;
   var c = new Vector.fromCoords(coords);
 
   var polygons = [], vertices;
-  
+
   vertex(theta, phi) {
     theta *= Math.PI * 2;
     phi *= Math.PI;
@@ -27,7 +30,7 @@ CSG sphere([List center, radius = 1, slices = 16, stacks = 8]) {
     );
     vertices.add(new Vertex(c.plus(dir.times(radius)), dir));
   }
-  
+
   for (var i = 0; i < slices; i++) {
     for (var j = 0; j < stacks; j++) {
       vertices = [];

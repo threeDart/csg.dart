@@ -1,5 +1,7 @@
 // # class Vertex
 
+part of csg;
+
 // Represents a vertex of a polygon. Use your own vertex class instead of this
 // one to provide additional features like texture coordinates and vertex
 // colors. Custom vertex classes need to provide a `pos` property and `clone()`,
@@ -11,7 +13,7 @@ class Vertex {
 
   Vector pos;
   Vector normal;
-  
+
   Vertex(this.pos, [this.normal]);
 
   clone() => new Vertex(pos.clone(), (normal != null) ? normal.clone() : null);
@@ -25,5 +27,5 @@ class Vertex {
   // override this to interpolate additional properties.
   interpolate(Vertex other, num t) => new Vertex( pos.lerp(other.pos, t),
                                                   (normal != null) ? normal.lerp(other.normal, t) : null);
-  
+
 }

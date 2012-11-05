@@ -1,8 +1,10 @@
+part of csg;
+
 class Plane {
-  
+
   Vector normal;
   num w;
-  
+
   Plane(this.normal, this.w);
 
   factory Plane.fromPoints(Vector a, Vector b, Vector c) {
@@ -13,7 +15,7 @@ class Plane {
   Plane clone() => new Plane(normal.clone(), w);
 
   toString() => "${normal} * ${w}";
-  
+
    flip() {
      normal = normal.negated();
      w = -w;
@@ -23,8 +25,8 @@ class Plane {
    static const int FRONT = 1;
    static const int BACK = 2;
    static const int SPANNING = 3;
-   
-   _classifyVertex( vertex ) {  
+
+   _classifyVertex( vertex ) {
      var side_value = this.normal.dot( vertex ) - this.w;
      if ( side_value < -EPSILON ) {
        return BACK;
@@ -34,7 +36,7 @@ class Plane {
        return COPLANAR;
      }
    }
-   
+
    // Split `polygon` by this plane if needed, then put the polygon or polygon
    // fragments in the appropriate lists. Coplanar polygons go into either
    // `coplanarFront` or `coplanarBack` depending on their orientation with
@@ -44,10 +46,10 @@ class Plane {
 
      // Classify each point as well as the entire polygon into one of the above
      // four classes.
-     
+
      var num_positive = 0,
          num_negative = 0;
-     
+
      var vertice_count = polygon.vertices.length; //
      for ( var i = 0; i < vertice_count; i++ ) {
        var v = polygon.vertices[i];
@@ -60,7 +62,7 @@ class Plane {
      }
 
      var polygonType = 0;
-     
+
      if ( num_positive > 0 && num_negative == 0 ) {
        polygonType = FRONT;
      } else if ( num_positive == 0 && num_negative > 0 ) {
@@ -70,7 +72,7 @@ class Plane {
      } else {
        polygonType = SPANNING;
      }
-     
+
      // Put the polygon in the correct list, splitting it when necessary.
      switch (polygonType) {
        case COPLANAR:
@@ -86,16 +88,16 @@ class Plane {
          var f = [], b = [];
          for (var i = 0; i < polygon.vertices.length; i++) {
            var j = (i + 1) % polygon.vertices.length;
-          
-           var vi = polygon.vertices[i], 
+
+           var vi = polygon.vertices[i],
                vj = polygon.vertices[j];
-           
-           int ti = _classifyVertex(vi.pos), 
+
+           int ti = _classifyVertex(vi.pos),
                tj = _classifyVertex(vj.pos);
-           
+
            if (ti != BACK) f.add(vi);
            if (ti != FRONT) b.add(ti != BACK ? vi.clone() : vi);
-           
+
            if ((ti | tj) == SPANNING) {
              var t = (this.w - this.normal.dot(vi.pos)) / this.normal.dot(vj.pos.minus(vi.pos));
              var v = vi.interpolate(vj, t);
@@ -106,6 +108,6 @@ class Plane {
          if (f.length >= 3) front.add(new Polygon(f)); //, polygon.shared));
          if (b.length >= 3) back.add(new Polygon(b)); //, polygon.shared));
          break;
-     }  
+     }
   }
 }

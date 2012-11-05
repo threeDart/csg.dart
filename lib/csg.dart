@@ -1,100 +1,67 @@
-/** Holds a binary space partition tree representing a 3D solid. Two solids can
- * be combined using the `union()`, `subtract()`, and `intersect()` methods. */
-class CSG {
-  List polygons;
+/** Constructive Solid Geometry (CSG) is a modeling technique that uses Boolean
+// operations like union and intersection to combine 3D solids. This library
+// implements CSG operations on meshes elegantly and concisely using BSP trees,
+// and is meant to serve as an easily understandable implementation of the
+// algorithm. All edge cases involving overlapping coplanar polygons in both
+// solids are correctly handled.
+//
+// Example usage:
+//
+//     var cube = CSG.cube();
+//     var sphere = CSG.sphere({ radius: 1.3 });
+//     var polygons = cube.subtract(sphere).toPolygons();
+//
+// ## Implementation Details
+//
+// All CSG operations are implemented in terms of two functions, `clipTo()` and
+// `invert()`, which remove parts of a BSP tree inside another BSP tree and swap
+// solid and empty space, respectively. To find the union of `a` and `b`, we
+// want to remove everything in `a` inside `b` and everything in `b` inside `a`,
+// then combine polygons from `a` and `b` into one solid:
+//
+//     a.clipTo(b);
+//     b.clipTo(a);
+//     a.build(b.allPolygons());
+//
+// The only tricky part is handling overlapping coplanar polygons in both trees.
+// The code above keeps both copies, but we need to keep them in one tree and
+// remove them in the other tree. To remove them from `b` we can clip the
+// inverse of `b` against `a`. The code for union now looks like this:
+//
+//     a.clipTo(b);
+//     b.clipTo(a);
+//     b.invert();
+//     b.clipTo(a);
+//     b.invert();
+//     a.build(b.allPolygons());
+//
+// Subtraction and intersection naturally follow from set operations. If
+// union is `A | B`, subtraction is `A - B = ~(~A | B)` and intersection is
+// `A & B = ~(~A | ~B)` where `~` is the complement operator.
+//
+// ## License
+//
+// Copyright (c) 2011 Evan Wallace (http://madebyevan.com/), under the MIT license.
+*/
 
+/**
+ * based on commit/a2ddcb99e6273177413b587eb0afb91292063685
+ * @author nelsonsilva - http://www.inevo.pt
+ **/
 
-  /** Construct a CSG solid from a list of `CSG.Polygon` instances.*/
-  CSG.fromPolygons(this.polygons);
-  
-  clone() => new CSG.fromPolygons(polygons.map((p) => p.clone()));
+library csg;
 
-  /** Return a new CSG solid representing space in either this solid or in the
-  // solid `csg`. Neither this solid nor the solid `csg` are modified.
-  // 
-  //     A.union(B)
-  // 
-  //     +-------+            +-------+
-  //     |       |            |       |
-  //     |   A   |            |       |
-  //     |    +--+----+   =   |       +----+
-  //     +----+--+    |       +----+       |
-  //          |   B   |            |       |
-  //          |       |            |       |
-  //          +-------+            +-------+
-  / */
-  union(csg) {
-    var a = new Node(this.clone().polygons);
-    var b = new Node(csg.clone().polygons);
-    a.clipTo(b);
-    b.clipTo(a);
-    b.invert();
-    b.clipTo(a);
-    b.invert();
-    a.build(b.allPolygons);
-    return new CSG.fromPolygons(a.allPolygons);
-  }
+import "dart:math" as Math;
 
-  /** Return a new CSG solid representing space in this solid but not in the
-  // solid `csg`. Neither this solid nor the solid `csg` are modified.
-  // 
-  //     A.subtract(B)
-  // 
-  //     +-------+            +-------+
-  //     |       |            |       |
-  //     |   A   |            |       |
-  //     |    +--+----+   =   |    +--+
-  //     +----+--+    |       +----+
-  //          |   B   |
-  //          |       |
-  //          +-------+
-  / */ 
-  subtract(csg) {
-    var a = new Node(this.clone().polygons);
-    var b = new Node(csg.clone().polygons);
-    a.invert();
-    a.clipTo(b);
-    b.clipTo(a);
-    b.invert();
-    b.clipTo(a);
-    b.invert();
-    a.build(b.allPolygons);
-    a.invert();
-    return new CSG.fromPolygons(a.allPolygons);
-  }
+part "src/csg.dart";
+part "src/vector.dart";
+part "src/vertex.dart";
+part "src/plane.dart";
+part "src/polygon.dart";
+part "src/node.dart";
+part "src/cube.dart";
+part "src/sphere.dart";
+part "src/cylinder.dart";
 
-  /** Return a new CSG solid representing space both this solid and in the
-  // solid `csg`. Neither this solid nor the solid `csg` are modified.
-  // 
-  //     A.intersect(B)
-  // 
-  //     +-------+
-  //     |       |
-  //     |   A   |
-  //     |    +--+----+   =   +--+
-  //     +----+--+    |       +--+
-  //          |   B   |
-  //          |       |
-  //          +-------+
-  / */ 
-  intersect(csg) {
-    var a = new Node(this.clone().polygons);
-    var b = new Node(csg.clone().polygons);
-    a.invert();
-    b.clipTo(a);
-    b.invert();
-    a.clipTo(b);
-    b.clipTo(a);
-    a.build(b.allPolygons);
-    a.invert();
-    return new CSG.fromPolygons(a.allPolygons);
-  }
-
-  /** Return a new CSG solid with solid and empty space switched. This solid is
-   * not modified. */
-  inverse() {
-    var csg = this.clone();
-    csg.polygons.map((p) => p.flip());
-    return csg;
-  }
-}
+/// [EPSILON] is the tolerance used by `splitPolygon()` to decide if a point is on the plane.
+const EPSILON = 1e-5;

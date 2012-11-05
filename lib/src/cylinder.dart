@@ -1,29 +1,32 @@
 // Construct a solid cylinder. Optional parameters are `start`, `end`,
 // `radius`, and `slices`, which default to `[0, -1, 0]`, `[0, 1, 0]`, `1`, and
 // `16`. The `slices` parameter controls the tessellation.
-// 
+//
 // Example usage:
-// 
+//
 //     var cylinder = CSG.cylinder({
 //       start: [0, -1, 0],
 //       end: [0, 1, 0],
 //       radius: 1,
 //       slices: 16
 //     });
-CSG cylinder([List start, List end, radius = 1, slices = 16]) {
-  var s = new Vector.fromCoords(start == null ? [0, -1, 0] : start);
-  var e = new Vector.fromCoords(end == null ? [0, 1, 0] : end);
+
+part of csg;
+
+CSG cylinder([List startp = null, List endp = null, radius = 1, slices = 16]) {
+  var s = new Vector.fromCoords(startp == null ? [0, -1, 0] : startp);
+  var e = new Vector.fromCoords(endp == null ? [0, 1, 0] : endp);
   var ray = e.minus(s);
   var r = radius;
-  var axisZ = ray.unit(); 
+  var axisZ = ray.unit();
   var isY = axisZ.y.abs() > 0.5;
-  
+
   var axisX = new Vector( isY? 1 : 0, isY? 0 : 1, 0).cross(axisZ).unit();
   var axisY = axisX.cross(axisZ).unit();
   var start = new Vertex(s, axisZ.negated());
   var end = new Vertex(e, axisZ.unit());
   var polygons = [];
-  
+
   point(stack, slice, normalBlend) {
     var angle = slice * Math.PI * 2;
     var out = axisX.times(Math.cos(angle)).plus(axisY.times(Math.sin(angle)));
