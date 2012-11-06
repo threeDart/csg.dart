@@ -78,7 +78,7 @@ class Node {
    * nodes there. Each set of polygons is partitioned using the first polygon
    * (no heuristic is used to pick a good split). */
   build(List<Polygon> polygons) {
-    if (polygons.isEmpty()) { return; }
+    if (polygons.isEmpty) { return; }
     if (this.plane == null) {
       this.plane = polygons[0].plane.clone();
     }
@@ -90,11 +90,11 @@ class Node {
       this.plane.splitPolygon(polygons[i], this.polygons, this.polygons, front, back);
     }
 
-    if (!front.isEmpty()) {
+    if (!front.isEmpty) {
       if (this.front == null) this.front = new Node();
       this.front.build(front);
     }
-    if (!back.isEmpty()) {
+    if (!back.isEmpty) {
       if (this.back == null) this.back = new Node();
       this.back.build(back);
     }
