@@ -26,7 +26,7 @@ class Node {
     if (plane != null) { node.plane = plane.clone(); }
     if (front != null) { node.front = front.clone(); }
     if (back != null) { node.back = back.clone(); }
-    node.polygons = polygons.map((p) => p.clone());
+    node.polygons = polygons.map((p) => p.clone()).toList(growable: true);
     return node;
   }
 

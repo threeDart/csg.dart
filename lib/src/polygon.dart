@@ -19,7 +19,7 @@ class Polygon {
     this.plane = new Plane.fromPoints(vertices[0].pos, vertices[1].pos, vertices[2].pos);
   }
 
-  clone() =>  new Polygon(vertices.map((v) => v.clone()), shared);
+  clone() =>  new Polygon(vertices.map((v) => v.clone()).toList(), shared);
 
   flip() {
     var flipped = [];
